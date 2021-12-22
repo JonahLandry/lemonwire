@@ -80,7 +80,7 @@ public class botDriver {
         // Write down our bot token so we can create a session.
         // Make sure the bot token is set in the arguments for this file!
         String bToken = new String(args[0]);
-        String APIHead = "http://localhost:5000/lemon/";
+        String APIHead = "http://Lemonapiwebapp-env.eba-8cqvu5dm.us-west-1.elasticbeanstalk.com/lemon";
 
 
         // ################### COMMANDS #########################
@@ -644,7 +644,11 @@ public class botDriver {
                         GuildAudioManager audioManager = GuildAudioManager.of(snowflake);
 
                         // Reconstruct the URL to point to the playlist we need
-                        URL APIUrl = new URL(APIHead + "playlists/" + playlistID + "/getsongs");
+                        String protoURL = APIHead + "/playlists/" + playlistID + "/getsongs";
+                        URL APIUrl = new URL(protoURL);
+
+
+
                         String dummyToken = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMjkwNDg1ODQ5ODQxOTkxNjgiLCJzdWIiOiJFYm9ueXRhbG9uIiwiaXNzIjoibGVtb24iLCJkaXNjcmltaW5hdG9yIjoiMTMzNyIsImlhdCI6MTY0MDE5MTM5NCwiZXhwIjoxNjQwMjc3Nzk0fQ.4buuLBcTWJCYyRqyS-HHtf7yWlto04GZ70_YxWABWNg";
 
 
@@ -765,78 +769,6 @@ public class botDriver {
 
                         }
                         con.disconnect();
-
-                        // PLAYER LOGIC TO ADD LATER
-                        /*
-                        // Check that our URL is a URL afterall, and if not we search for it
-                        if (!isUrl(audioUrl)) {
-                            audioUrl = "ytsearch:" + audioUrl;
-                        }
-
-                        // Grab the scheduler and then load it with the given URL
-                        TrackScheduler scheduler = audioManager.getScheduler();
-
-                        // Create a new load requeuest using a new handler that overrides the usual so we can access
-                        // both the channel and the track for parsing.
-                        String finalAudioUrl = audioUrl;
-                        PLAYER_MANAGER.loadItemOrdered(audioManager, audioUrl, new AudioLoadResultHandler() {
-                            @Override
-                            public void trackLoaded(AudioTrack track) {
-                                scheduler.queue(track);
-
-                                command.getChannel().flatMap(channel -> {
-                                    String message = command.getUserData().username() +
-                                            " added `" +
-                                            track.getInfo().title +
-                                            "` by `" +
-                                            track.getInfo().author +
-                                            "` to the queue!";
-                                    return channel.createMessage(message);
-                                }).subscribe();
-                            }
-                            // Override for playlists
-                            @Override
-                            public void playlistLoaded(AudioPlaylist playlist) {
-                                if (playlist.isSearchResult()){
-                                    trackLoaded(playlist.getTracks().get(0));
-                                }
-                                else {
-                                    final List<AudioTrack> tracks = playlist.getTracks();
-
-                                    command.getChannel().flatMap(channel -> {
-                                        String message = command.getUserData().username() +
-                                                " added `" +
-                                                String.valueOf(tracks.size()) +
-                                                "` tracks from the playlist `" +
-                                                playlist.getName() +
-                                                "` to the queue!";
-                                        return channel.createMessage(message);
-                                    }).subscribe();
-
-                                    for (final AudioTrack track : tracks) {
-                                        audioManager.getScheduler().queue(track);
-                                    }
-                                }
-
-                            }
-
-                            @Override
-                            public void noMatches() {
-                                command.getChannel().flatMap(channel -> {
-                                    String message = "Unable to find a match for " + finalAudioUrl;
-                                    return channel.createMessage(message);
-                                }).subscribe();
-                            }
-
-                            @Override
-                            public void loadFailed(FriendlyException exception) {
-                                command.getChannel().flatMap(channel -> {
-                                    String message = "Unable to load " + finalAudioUrl + " if it is age restricted, " +
-                                            "this cannot be helped. Sorry.";
-                                    return channel.createMessage(message);
-                                }).subscribe();
-                            }
-                        });*/
                     } catch (MalformedURLException E) {
                         // If that doesn't work then we tell the user they put it in wrong
                         command.getChannel().flatMap(message ->
