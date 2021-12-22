@@ -4,29 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92650b9f-9f61-4307-8b74-2390c4317c85" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/revature/lemon/discord/audio/GuildAudioManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/revature/lemon/discord/audio/LavaPlayerAudioProvider.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/revature/lemon/discord/audio/TrackScheduler.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/revature/lemon/discord/botDriver.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/revature/lemon/discord/commands/Command.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/audio/GuildAudioManager.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/audio/LavaPlayerAudioProvider.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/audio/TrackScheduler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/botDriver$1.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/botDriver$2.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/botDriver.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/revature/lemon/discord/commands/Command.class" beforeDir="false" />
-    </list>
+    <list default="true" id="92650b9f-9f61-4307-8b74-2390c4317c85" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,12 +20,12 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../DiscordBot/lemonAPI" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunManager" selected="Application.botDriver">
     <configuration name="LemonDriver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.revature.lemon.LemonDriver" />
-      <module name="lemonAPI" />
+      <module name="lemonwire" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.revature.lemon.*" />
@@ -62,7 +40,7 @@
       <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.revature.lemon.discord.botDriver" />
-      <module name="lemonAPI" />
+      <module name="lemonwire" />
       <option name="PROGRAM_PARAMETERS" value="OTE4NTIxMzI3MTMwOTE0ODg2.YbIdpQ.SQYjbqtBHGz7-Z74t0RZXpK9wXE" />
       <extension name="coverage">
         <pattern>
