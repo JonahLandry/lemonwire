@@ -682,6 +682,16 @@ public class botDriver {
                                 JSONParser parse = new JSONParser();
                                 JSONArray playlist = (JSONArray) parse.parse(output);
 
+                                command.getChannel().flatMap(channel -> {
+                                    String message = command.getUserData().username() +
+                                            " added `" +
+                                            String.valueOf(playlist.size()) +
+                                            "` tracks from the playlist at ID `" +
+                                            playlistID +
+                                            "` to the queue!";
+                                    return channel.createMessage(message);
+                                }).subscribe();
+
                                 // Iterate through our result array, queuing each song into the player.
                                 for(int i = 0; i < playlist.size() ; i++)
                                 {
@@ -708,16 +718,6 @@ public class botDriver {
                                         @Override
                                         public void trackLoaded(AudioTrack track) {
                                             scheduler.queue(track);
-
-                                            command.getChannel().flatMap(channel -> {
-                                                String message = command.getUserData().username() +
-                                                        " added `" +
-                                                        track.getInfo().title +
-                                                        "` by `" +
-                                                        track.getInfo().author +
-                                                        "` to the queue!";
-                                                return channel.createMessage(message);
-                                            }).subscribe();
                                         }
                                         // Override for playlists
                                         @Override
@@ -727,16 +727,6 @@ public class botDriver {
                                             }
                                             else {
                                                 final List<AudioTrack> tracks = playlist.getTracks();
-
-                                                command.getChannel().flatMap(channel -> {
-                                                    String message = command.getUserData().username() +
-                                                            " added `" +
-                                                            String.valueOf(tracks.size()) +
-                                                            "` tracks from the playlist `" +
-                                                            playlist.getName() +
-                                                            "` to the queue!";
-                                                    return channel.createMessage(message);
-                                                }).subscribe();
 
                                                 for (final AudioTrack track : tracks) {
                                                     audioManager.getScheduler().queue(track);
