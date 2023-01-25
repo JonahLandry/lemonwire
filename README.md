@@ -5,7 +5,7 @@ It can also run playlists created in the Lemonwire Website ( LINK HERE ) via pla
 This particular branch is uncoupled from the website, and just supports the bot itself.
 
 
-# commands
+## Commands
 join 	- Joins the sender's voice channel
 
 leave 	- Leaves the sender's voice channel
@@ -31,8 +31,15 @@ remove	- Removes a song at the given index in the queue. You can see these in th
 
 shuffle	- Shuffles the queue of currently playing music
 
+swap - Swaps two songs using their positions in the queue
+	- SYNTAX: "&swap [QueuePosition1] [QueuePosition2]"
+
+loop - Toggles the queue so that it will loop songs, placing them at the back of the queue when they finish playing
+	- SYNTAX: "&loop"
+
+####=NOT SUPPORTED IN THIS BRANCH=
 playlist- Given a playlist ID from the website, queues that entire playlist
 	- SYNTAX: "&playlist [playlistID]"
 
-# Setup
+## Setup
 Bot is invited to servers on a need to know basis. You gotta know a guy. If you want to use the code to make your own bot, feel free, but you will need to send in the bot's token in the arguments of the botDriver class.
