@@ -11,10 +11,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class TrackScheduler extends AudioEventAdapter {
     public final AudioPlayer player;
     public final BlockingQueue<AudioTrack> queue;
+    public Boolean doLoop;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
+        this.doLoop = false;
     }
 
     public void queue(AudioTrack track) {
@@ -42,9 +44,15 @@ public class TrackScheduler extends AudioEventAdapter {
         }
     }
 
+
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (endReason.mayStartNext) {
+        if (endReason.mayStartNext && !this.doLoop) {
+            nextTrack();
+        }
+        if (endReason.mayStartNext && this.doLoop) {
+            System.out.println("ERROR V: " + track.getInfo().title + " Original title");
+            this.queue.offer(track.makeClone());
             nextTrack();
         }
     }

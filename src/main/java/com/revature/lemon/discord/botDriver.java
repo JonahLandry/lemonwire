@@ -157,6 +157,35 @@ public class botDriver {
                 .then());
 
 
+        // LOOP
+        // Sets the queue to loop currently played songs
+        commands.put("loop", event -> Mono.justOrEmpty(event.getMessage())
+                .doOnNext(command -> {
+                    // Get the guild ID for targeting
+                    Snowflake snowflake =  command.getGuildId().orElseThrow(RuntimeException::new);
+
+                    // Audio manager for scheduler manipulation
+                    GuildAudioManager audioManager = GuildAudioManager.of(snowflake);
+
+                    // Grab the scheduler and then load it with the given URL
+                    TrackScheduler scheduler = audioManager.getScheduler();
+
+                    if (scheduler.doLoop) {
+                        scheduler.doLoop = false;
+                        command.getChannel().flatMap(channel -> {
+                            String message = "Queue has **stopped looping**!";
+                            return channel.createMessage(message);
+                        }).subscribe();
+                    }
+                    else {
+                        scheduler.doLoop = true;
+                        command.getChannel().flatMap(channel -> {
+                            String message = "Queue has **begun looping**!";
+                            return channel.createMessage(message);
+                        }).subscribe();
+                    }
+                }).then());
+
         // PLAY
         // Constructs a command to play a given song
         commands.put("play ", event -> Mono.justOrEmpty(event.getMessage())
@@ -297,6 +326,11 @@ public class botDriver {
                                     // Tell them the skip is happening
                                     String output = "Skipping `" + audioManager.getPlayer().getPlayingTrack().getInfo().title + "`";
                                     message.getChannel().flatMap(textChannel -> textChannel.createMessage(output)).subscribe();
+
+                                    // Check if we're looping and save the current song if so
+                                    if (audioManager.getScheduler().doLoop){
+                                        audioManager.getScheduler().queue(audioManager.getPlayer().getPlayingTrack().makeClone());
+                                    }
 
                                     // Perform a skip which returns a boolean value.
                                     // If that value is false, then we need to destroy the player because we're out of songs.
@@ -573,6 +607,66 @@ public class botDriver {
 
                 })
                 .then());
+
+        // SWAP
+        // Swaps the positions of two songs by recreating the queue.
+        commands.put("swap ", event-> Mono.justOrEmpty(event.getMessage())
+                .doOnNext(message -> {
+                            // Initial return message
+                            String returnMessage = "";
+
+                            // Get the guild ID
+                            Snowflake guildID = message.getGuildId().orElseThrow(RuntimeException::new);
+
+                            // Grab the audio manager
+                            GuildAudioManager guildAudio = GuildAudioManager.of(guildID);
+
+                            try {
+                                // Grab the queue
+                                List<AudioTrack> oldQueue = new LinkedList(guildAudio.getScheduler().queue);
+                                List<AudioTrack> newQueue = oldQueue;
+
+                                // Get the target size for the new queue
+                                Integer remainingSongs = oldQueue.size();
+
+                                // Record our target positions
+                                int SongAPos = Integer.valueOf(message.getContent().split(" ")[1]) - 1;
+                                int SongBPos = Integer.valueOf(message.getContent().split(" ")[2]) - 1;
+                                AudioTrack SongA = oldQueue.get(SongAPos);
+                                AudioTrack SongB = oldQueue.get(SongBPos);
+                                System.out.println("=====DEBUG==== : Able to save songs desired!");
+                                System.out.println("DEBUG    " + oldQueue.get(SongAPos).getInfo().title);
+
+                                // Perform the swap
+                                newQueue.set(SongAPos, SongB);
+                                newQueue.set(SongBPos, SongA);
+                                System.out.println("DEBUG    " + newQueue.get(SongAPos).getInfo().title);
+
+                                // Blow up the old queue
+                                guildAudio.getScheduler().clear();
+                                // Rebuild
+                                for (int i = 0; i < remainingSongs; i++) {
+                                    // Grab from the new
+                                    AudioTrack target = newQueue.get(i);
+                                    guildAudio.getScheduler().queue(target);
+                                }
+
+                                returnMessage = returnMessage + "\nSuccessfully swapped " + SongA.getInfo().title +" with " +
+                                                    SongB.getInfo().title + "!";
+                            } catch (Exception e) {
+                                returnMessage = returnMessage + e.getMessage();
+                                System.out.println("===============ERROR=================\n" + returnMessage);
+                                returnMessage = "Could not swap the songs... \n" + e.getMessage();
+                            }
+
+                            // Send our result over discord
+                            String finalMessage = returnMessage;
+                            message.getChannel().flatMap(channel -> {
+                                return channel.createMessage(finalMessage);
+                            }).subscribe();
+
+                        }
+                ).then());
 
         // SHUFFLE
         // Shuffles the order of the queue
