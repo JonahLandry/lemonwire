@@ -1,7 +1,8 @@
-# lemonwire
+# Lemonwire
 This project creates a bot that runs on discord and plays songs from youtube, soundcloud, or bandcamp. 
 
 It can also run playlists created in the Lemonwire Website ( LINK HERE ) via playlist IDs.
+This particular branch is uncoupled from the website, and just supports the bot itself.
 
 
 # commands
