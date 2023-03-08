@@ -280,6 +280,123 @@ public class botDriver {
                 })
                 .then());
 
+        // playnext
+        // Queues up a song to play next in the order
+        commands.put("playnext ", event -> Mono.justOrEmpty(event.getMessage())
+                .doOnNext(command -> {
+                    try {
+                        // Get the url from the second line provided in the command
+                        String audioUrl = command.getContent().substring(command.getContent().indexOf(" ") + 1);
+
+                        // Get the guild ID for targeting
+                        Snowflake snowflake =  command.getGuildId().orElseThrow(RuntimeException::new);
+
+                        // Audio manager for scheduler manipulation
+                        GuildAudioManager audioManager = GuildAudioManager.of(snowflake);
+
+                        // Check that our URL is a URL afterall, and if not we search for it
+                        if (!isUrl(audioUrl)) {
+                            audioUrl = "ytsearch:" + audioUrl;
+                        }
+
+
+                        // Create a new load requeuest using a new handler that overrides the usual so we can access
+                        // both the channel and the track for parsing.
+                        String finalAudioUrl = audioUrl;
+                        PLAYER_MANAGER.loadItemOrdered(audioManager, audioUrl, new AudioLoadResultHandler() {
+                            @Override
+                            public void trackLoaded(AudioTrack track) {
+                                // Grab the queue
+                                List<AudioTrack> trackList = new LinkedList(audioManager.getScheduler().queue);
+
+                                // Get the number of tracks currently in the playlist
+                                Integer remainingSongs = trackList.size();
+
+
+                                // Blow up the old queue
+                                audioManager.getScheduler().clear();
+                                // Queue up the new song
+                                audioManager.getScheduler().queue(track);
+                                // Rebuild
+                                for (int i = 0; i < remainingSongs; i++) {
+                                    // Grab from the new
+                                    AudioTrack target = trackList.get(i);
+                                    audioManager.getScheduler().queue(target);
+                                }
+
+                                command.getChannel().flatMap(channel -> {
+                                    String message = command.getUserData().username() +
+                                            " is playing  `" +
+                                            track.getInfo().title +
+                                            "` by `" +
+                                            track.getInfo().author +
+                                            "` next!";
+                                    return channel.createMessage(message);
+                                }).subscribe();
+                            }
+                            // Override for playlists
+                            @Override
+                            public void playlistLoaded(AudioPlaylist playlist) {
+                                if (playlist.isSearchResult()){
+                                    trackLoaded(playlist.getTracks().get(0));
+                                }
+                                else {
+                                    final List<AudioTrack> tracks = playlist.getTracks();
+
+                                    command.getChannel().flatMap(channel -> {
+                                        String message = command.getUserData().username() +
+                                                " added `" +
+                                                String.valueOf(tracks.size()) +
+                                                "` tracks from the playlist `" +
+                                                playlist.getName() +
+                                                "` up next!";
+                                        return channel.createMessage(message);
+                                    }).subscribe();
+                                    // Grab the current track list
+                                    List<AudioTrack> trackList = new LinkedList(audioManager.getScheduler().queue);
+                                    // Blow up the old queue
+                                    audioManager.getScheduler().clear();
+                                    // Queue up the new songs
+                                    for (final AudioTrack track : tracks) {
+                                        audioManager.getScheduler().queue(track);
+                                    }
+                                    // Rebuild the old queue at the end
+                                    for (int i = 0; i < trackList.size(); i++) {
+                                        AudioTrack target = trackList.get(i);
+                                        audioManager.getScheduler().queue(target);
+                                    }
+                                }
+
+                            }
+
+                            @Override
+                            public void noMatches() {
+                                command.getChannel().flatMap(channel -> {
+                                    String message = "Unable to find a match for " + finalAudioUrl;
+                                    return channel.createMessage(message);
+                                }).subscribe();
+                            }
+
+                            @Override
+                            public void loadFailed(FriendlyException exception) {
+                                command.getChannel().flatMap(channel -> {
+                                    String message = "Unable to load " + finalAudioUrl + " if it is age restricted, " +
+                                            "this cannot be helped. Sorry.";
+                                    return channel.createMessage(message);
+                                }).subscribe();
+                            }
+                        });
+                    } catch (Exception E) {
+                        // If that doesn't work then we tell the user they put it in wrong
+                        command.getChannel().flatMap(message ->
+                                        message.createMessage("Invalid input! Give a valid youtube, soundcloud, or bandcamp url!"))
+                                .subscribe();
+                    }
+
+
+                })
+                .then());
+
         // LEAVE
         // Constructs a command to get the bot to leave the channel
         commands.put("leave", event -> Mono.justOrEmpty(event.getMessage())
@@ -528,21 +645,40 @@ public class botDriver {
                     // Grab the queue
                     BlockingQueue<AudioTrack> queue = guildAudio.getScheduler().queue;
 
+                    // Get the page number if provided
+                    int pgNum = 0;
+                    try {
+                        pgNum = Integer.valueOf(message.getContent().split(" ")[1]);
+                    }
+                    catch(Exception e){
+                        pgNum = 1;
+                    }
+
+                    System.out.println("=== DEBUG ===\nPage Number: " + pgNum);
+
+                    int finalPgNum = pgNum;
                     message.getChannel()
                             .flatMap(channel -> {
                                 // Create our initial return message
                                 String returnMessage = "";
+                                final List<AudioTrack> trackList = new ArrayList<>(queue);
 
                                 // If the queue is empty return this message
                                 if (queue.isEmpty()) {
                                     returnMessage = "The queue is currently empty";
                                 }
+                                else if((finalPgNum-1)*20 > trackList.size() || (finalPgNum-1)*20 < 0){
+                                    returnMessage = "Index out of range...";
+                                }
                                 // Else create our queue message with a maximum of 20 items to prevent overflow in discord.
                                 else {
-                                    final List<AudioTrack> trackList = new ArrayList<>(queue);
-                                    final int trackCount = Math.min(queue.size(), 20);
+                                    final int trackCount = queue.size();
+                                    final int endPos = Math.min(trackCount,(finalPgNum) *20);
+                                    System.out.println("trackCount: "+ trackCount);
+                                    System.out.println("endPos: " + endPos);
 
-                                    for (int i = 0; i < trackCount; i++){
+                                    for (int i = (finalPgNum-1) *20; i < endPos; i++){
+                                        System.out.println("i: "+ i);
                                         final AudioTrack track = trackList.get(i);
                                         final AudioTrackInfo info = track.getInfo();
 
@@ -554,9 +690,9 @@ public class botDriver {
                                                 formatTime(track.getDuration()) + "`]\n";
                                     }
 
-                                    if (trackList.size() > trackCount) {
+                                    if (trackList.size() > endPos) {
                                         returnMessage = returnMessage + " and `" +
-                                                String.valueOf(trackList.size() - trackCount) + "` more...";
+                                                String.valueOf(trackList.size() - endPos) + "` more...";
                                     }
                                 }
                                 return channel.createMessage(returnMessage);
