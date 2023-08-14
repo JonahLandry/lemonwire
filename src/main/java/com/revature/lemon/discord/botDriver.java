@@ -170,17 +170,24 @@ public class botDriver {
                     // Grab the scheduler and then load it with the given URL
                     TrackScheduler scheduler = audioManager.getScheduler();
 
-                    if (scheduler.doLoop) {
-                        scheduler.doLoop = false;
+                    if (scheduler.doLoop == 2) {
+                        scheduler.doLoop = 0;
                         command.getChannel().flatMap(channel -> {
                             String message = "Queue has **stopped looping**!";
                             return channel.createMessage(message);
                         }).subscribe();
                     }
-                    else {
-                        scheduler.doLoop = true;
+                    else if (scheduler.doLoop == 0) {
+                        scheduler.doLoop = 1;
                         command.getChannel().flatMap(channel -> {
                             String message = "Queue has **begun looping**!";
+                            return channel.createMessage(message);
+                        }).subscribe();
+                    }
+                    else {
+                        scheduler.doLoop = 2;
+                        command.getChannel().flatMap(channel -> {
+                            String message = "Now looping '" + scheduler.player.getPlayingTrack().getInfo().title + "'";
                             return channel.createMessage(message);
                         }).subscribe();
                     }
@@ -445,7 +452,7 @@ public class botDriver {
                                     message.getChannel().flatMap(textChannel -> textChannel.createMessage(output)).subscribe();
 
                                     // Check if we're looping and save the current song if so
-                                    if (audioManager.getScheduler().doLoop){
+                                    if (audioManager.getScheduler().doLoop == 1 || audioManager.getScheduler().doLoop == 2){
                                         audioManager.getScheduler().queue(audioManager.getPlayer().getPlayingTrack().makeClone());
                                     }
 
@@ -461,6 +468,23 @@ public class botDriver {
                         message.getChannel().flatMap(textChannel -> textChannel.createMessage(output)).subscribe();
                     }
 
+                })
+                .then());
+
+        // CLEAR
+        // Clears the queue, removing any song that's been prepped.
+        commands.put("clear", event -> Mono.justOrEmpty(event.getMessage())
+                .doOnNext(message -> {
+                    // Find out where the user currently is and get that audio manager.
+                    Snowflake guildID = message.getGuildId().orElseThrow(RuntimeException::new);
+                    GuildAudioManager audioManager = GuildAudioManager.of(guildID);
+
+                    // Clear the player
+                    audioManager.getScheduler().clear();
+
+                    // Alert that it's been done.
+                    String output = "Queue is now clear!";
+                    message.getChannel().flatMap(textChannel -> textChannel.createMessage(output)).subscribe();
                 })
                 .then());
 
